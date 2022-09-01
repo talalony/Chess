@@ -46,7 +46,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     // computer algorithm vars
     static boolean isCompDone = true;
     static int moveTime = 2;
-    static int timeBound = 10;
+    static int timeBound = 20;
+    static int minDepth = 7;
     static LocalTime algStartTime = null;
     static int[] lastCompBestMove = new int[4];
     static int depth = 0;
@@ -980,7 +981,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                     GamePanel.depth = depth;
                     Integer[] arr = ChessGame.minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, computersColor);
                     long t = SECONDS.between(algStartTime, LocalTime.now());
-                    if (depth > 5 && t >= moveTime || t >= timeBound) {
+                    if (depth > minDepth && t >= moveTime || t >= timeBound) {
                         System.out.println("depth=" + (depth - 1) + ": " + ChessGame.countMoves);
                         return result;
                     }

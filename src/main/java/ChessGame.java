@@ -597,7 +597,7 @@ public class ChessGame {
                 return new Integer[]{0, null, null, null, null};
         }
         else {
-            if (t >= GamePanel.moveTime && GamePanel.depth > 5 || t >= GamePanel.timeBound)
+            if (t >= GamePanel.moveTime && GamePanel.depth > GamePanel.minDepth || t >= GamePanel.timeBound)
                 return new Integer[]{0, null, null, null, null};
         }
         if (GamePanel.isTimeOver(color))

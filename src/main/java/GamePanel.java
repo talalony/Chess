@@ -1,3 +1,5 @@
+import org.json.simple.parser.ParseException;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
@@ -5,6 +7,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -23,12 +28,13 @@ import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
     public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-//    	public static String startFen = "r4rk1/pp1nbppp/2pp4/4q3/4PB2/2NP1RQP/PPP3P1/R5K1 b - - 10 7";
+//    	public static String startFen = "8/8/8/3K4/6r1/3Q4/6k1/8 w - - 0 8";
 //public static String startFen = "r4rk1/1R2bp1p/2p3p1/p3p3/7q/P2BBP2/1PQ2PPP/5RK1 b - - 0 8";
     public static String lastMoveFen = startFen;
 
@@ -46,13 +52,14 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     // computer algorithm vars
     static boolean isCompDone = true;
     static int moveTime = 2;
-    static int timeBound = 20;
-    static int minDepth = 7;
+    static int timeBound = 10;
+    static int minDepth = 5;
     static LocalTime algStartTime = null;
     static int[] lastCompBestMove = new int[4];
     static int depth = 0;
     static boolean computersColor = false;
     static int[][] principalVariation;
+    public static boolean tableBase = true;
 
     // game vars
     public static int[] enPassant = new int[2];
@@ -959,11 +966,57 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                 openingMoves(randomMove, computersColor);
             }
         }
-        if (moves.isEmpty()) {
+        int compMin = (computersColor) ? whiteMinutes : blackMinutes;
+        int compSec = (computersColor) ? whiteSeconds : blackSeconds;
+        if (whitePieces.size()+blackPieces.size() <= 7 && !(compMin == 0 && compSec <= 30) && tableBase) {
+            isCompDone = false;
+            playTableBase();
+        }
+        else if (moves.isEmpty()) {
             isCompDone = false;
             if (!isGameEnded)
                 startThinking();
         }
+    }
+
+    public void playTableBase() {
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() {
+                try {
+                    runPython(lastMoveFen, computersColor);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+            @Override
+            protected void done() {
+                ReadJson sample = new ReadJson();
+                String[] res = new String[2];
+                try {
+                    res = sample.getJson();
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+                isCompDone = true;
+                if (res[0].equals("losing")) {
+                    tableBase = false;
+                    return;
+                }
+                String m = res[1].split("=")[0];
+                try {
+                    openingMoves(m, computersColor);
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                    tableBase = false;
+                    return;
+                }
+                System.out.println(m +" "+res[0]);
+            }
+        };
+        worker.execute();
     }
 
     public void startThinking() {
@@ -1073,6 +1126,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                 tblackPieces = ChessGame.copy(blackPieces);
                 ChessGame.updateThreats(computersColor);
                 ChessGame.countMoves = 0;
+                tableBase = true;
             }
 
 
@@ -1895,9 +1949,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
             row = 8 - Character.getNumericValue(move.charAt(1));
             col = colMapping.get(move.charAt(0));
         } else if (move.length() == 3) {
-            pieceType = pieceMapping.get(move.charAt(0));
-            row = 8 - Character.getNumericValue(move.charAt(2));
-            col = colMapping.get(move.charAt(1));
+            if (move.charAt(2) == '+') {
+                row = 8 - Character.getNumericValue(move.charAt(1));
+                col = colMapping.get(move.charAt(0));
+            }
+            else {
+                pieceType = pieceMapping.get(move.charAt(0));
+                row = 8 - Character.getNumericValue(move.charAt(2));
+                col = colMapping.get(move.charAt(1));
+            }
         } else if (move.length() == 4) {
             if (move.charAt(3) == '+' | move.charAt(3) == '#') {
                 pieceType = pieceMapping.get(move.charAt(0));
@@ -1987,6 +2047,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                 }
             }
         }
+        throw new RuntimeException("Move not found!");
     }
 
 
@@ -1995,6 +2056,22 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
             return Long.parseLong(Binary, 2);
         } else {
             return Long.parseLong("1" + Binary.substring(2), 2) * 2;
+        }
+    }
+
+    public void runPython(String fen, boolean color) throws IOException {
+        String c = color+"";
+        String[] cmd = {
+                "python",
+                "C:\\java projects\\tableBase.py",
+                c,
+                fen
+        };
+        Process p =  Runtime.getRuntime().exec(cmd);
+        try {
+            p.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

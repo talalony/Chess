@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
-    public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-//    	public static String startFen = "8/8/8/3K4/6r1/3Q4/6k1/8 w - - 0 8";
+//    public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    	public static String startFen = "8/8/8/4Q3/3K4/8/5pk1/8 w - - 0 8";
 //public static String startFen = "r4rk1/1R2bp1p/2p3p1/p3p3/7q/P2BBP2/1PQ2PPP/5RK1 b - - 0 8";
     public static String lastMoveFen = startFen;
 
@@ -970,7 +970,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         int compSec = (computersColor) ? whiteSeconds : blackSeconds;
         if (whitePieces.size()+blackPieces.size() <= 7 && !(compMin == 0 && compSec <= 30) && tableBase) {
             isCompDone = false;
-            playTableBase();
+            if (!isGameEnded)
+                playTableBase();
         }
         else if (moves.isEmpty()) {
             isCompDone = false;

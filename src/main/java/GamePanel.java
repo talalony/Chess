@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
 //    public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    	public static String startFen = "8/8/8/4Q3/3K4/8/5pk1/8 w - - 0 8";
+    	public static String startFen = "8/p7/2K2k2/8/3N4/1N6/8/8 w - - 0 8";
 //public static String startFen = "r4rk1/1R2bp1p/2p3p1/p3p3/7q/P2BBP2/1PQ2PPP/5RK1 b - - 0 8";
     public static String lastMoveFen = startFen;
 
@@ -994,14 +994,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
             }
             @Override
             protected void done() {
+                isCompDone = true;
                 ReadJson sample = new ReadJson();
                 String[] res = new String[2];
                 try {
                     res = sample.getJson();
                 } catch (IOException | ParseException e) {
-                    e.printStackTrace();
+                    tableBase = false;
+                    return;
                 }
-                isCompDone = true;
                 if (res[0].equals("losing")) {
                     tableBase = false;
                     return;
@@ -1010,7 +1011,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                 try {
                     openingMoves(m, computersColor);
                 } catch (RuntimeException e) {
-                    e.printStackTrace();
                     tableBase = false;
                     return;
                 }
@@ -2070,7 +2070,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         };
         Process p =  Runtime.getRuntime().exec(cmd);
         try {
-            p.waitFor();
+            p.waitFor(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -2064,7 +2064,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         String c = color+"";
         String[] cmd = {
                 "python",
-                "C:\\java projects\\tableBase.py",
+                System.getProperty("user.dir") + "\\tableBase.py",
                 c,
                 fen
         };

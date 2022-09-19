@@ -17,7 +17,7 @@ public class ReadJson {
     }
 
     public String[] getJson() throws IOException, ParseException {
-        String fileName = "C:\\java projects\\sample.json";
+        String fileName = "sample.json";
         JSONParser jsonParser = new JSONParser();
         FileReader reader = new FileReader(fileName);
         Object obj = jsonParser.parse(reader);

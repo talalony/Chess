@@ -24,6 +24,7 @@ import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultCaret;
 
 import java.util.*;
 import java.util.List;
@@ -33,9 +34,9 @@ import java.util.concurrent.TimeUnit;
 
 public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
-//    public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    	public static String startFen = "8/p7/2K2k2/8/3N4/1N6/8/8 w - - 0 8";
-//public static String startFen = "r4rk1/1R2bp1p/2p3p1/p3p3/7q/P2BBP2/1PQ2PPP/5RK1 b - - 0 8";
+    public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+//    	public static String startFen = "8/p7/2K2k2/8/3N4/1N6/8/8 w - - 0 8";
+//public static String startFen = "4r1k1/1QP2pp1/p6p/P7/8/2r1p2P/4K1P1/8 w - - 0 8";
     public static String lastMoveFen = startFen;
 
     // display
@@ -90,6 +91,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
     // animation
     JLabel movesBoard;
+    JScrollPane scrollPane;
+    public static int toScroll = 2;
+    static JScrollBar vertical;
     boolean resignLabel = false;
     static boolean animation = false;
     static boolean dragging;
@@ -665,14 +669,24 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         String[] arr = chessMoveList.split(" ");
         if (chessMoveList == "")
             arr = new String[0];
-        String drawMoveList = "";
+        String drawMoveList = "<html>";
         for (int i = 0; i < arr.length; i++) {
-            if ((i + 1) % 2 == 1)
-                drawMoveList += (i / 2 + 1) + ": ";
-            drawMoveList += arr[i] + " ";
+            if ((i + 1) % 2 == 1) {
+                String space = "&nbsp;";
+                String word = (i / 2 + 1) + ": " + arr[i];
+                space = new String(new char[12-word.length()]).replace("\0", space);
+                drawMoveList += "&nbsp;" + word + space;
+            }
+            else
+                drawMoveList += arr[i] + "<br/>";
         }
-
-        movesBoard.setText("<html><p style=\"width:165px\">" + drawMoveList + "</p></html>");
+        int x = scrollPane.getWidth() - 60;
+//        movesBoard.setText("<html><p style=\"width:"+x+"px\">" + drawMoveList + "</p></html>");
+        movesBoard.setText(drawMoveList+"</html>");
+        if (toScroll > 0) {
+            vertical.setValue(vertical.getMaximum());
+            toScroll -= 1;
+        }
     }
 
     private void drawTakenPieces(Graphics2D g) {
@@ -899,16 +913,19 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         if (running) {
             if (stalemate) {
                 if (!isGameEnded) {
-                    if (!chessMoveList.contains("#"))
+                    if (!chessMoveList.contains("#")) {
                         chessMoveList = chessMoveList.substring(0, chessMoveList.length() - 2) + "# ";
+                    }
                 }
                 isGameEnded = true;
                 resignButton.setText("Exit");
             }
             if (halfMoves == 50) {
                 if (!isGameEnded) {
-                    if (!chessMoveList.contains("#"))
+                    if (!chessMoveList.contains("#")) {
                         chessMoveList = chessMoveList.substring(0, chessMoveList.length() - 2) + "# ";
+                        vertical.setValue(vertical.getMaximum());
+                    }
                 }
                 isGameEnded = true;
                 resignButton.setText("Exit");
@@ -933,10 +950,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
             return;
         }
         int moveNum = Integer.parseInt(lastMoveFen.split(" ")[5]);
-//		if (moveNum == 1) {
-//			openingMoves("e4", computersColor);
-//			return;
-//		}
+		if (moveNum == 1 && computersColor) {
+			openingMoves("e4", computersColor);
+			return;
+		}
         List<String> moves = new ArrayList<>();
         if (moveNum < 7) {
             try {
@@ -1184,12 +1201,16 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
                             board = positionFromFen((String) last[0]);
                             whiteTime = (int) last[3];
                             blackTime = (int) last[4];
-                            if (moveListCounter == 1)
+                            if (moveListCounter == 1) {
                                 chessMoveList += words[moveListCounter - 1];
-                            else
+                                vertical.setValue(vertical.getMaximum());
+                            }
+                            else {
                                 chessMoveList += " " + words[moveListCounter - 1];
-                            if (moveListCounter == playerMoveList.size() - 1)
+                            }
+                            if (moveListCounter == playerMoveList.size() - 1) {
                                 chessMoveList += " " + words[moveListCounter];
+                            }
                         }
                         break;
                     }
@@ -1350,10 +1371,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         movesBoard.setBackground(new Color(45, 45, 45));
         movesBoard.setVerticalAlignment(JLabel.TOP);
         movesBoard.setOpaque(true);
-        movesBoard.setFont(new Font("Arial Black", Font.PLAIN, 15));
+        movesBoard.setFont(new Font(Font.MONOSPACED, Font.BOLD, 18));
         Border boardBorder = BorderFactory.createLineBorder(Color.white.darker(), 1);
         movesBoard.setBorder(boardBorder);
-        JScrollPane scrollPane = new JScrollPane(movesBoard);
+        scrollPane = new JScrollPane(movesBoard);
+        vertical = scrollPane.getVerticalScrollBar();
         scrollPane.setPreferredSize(new Dimension(w * 2 / 3, unitSize * 6));
         scrollPane.setBounds(w / 6, h + unitSize, w * 2 / 3, unitSize * 6);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);

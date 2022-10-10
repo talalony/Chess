@@ -274,6 +274,7 @@ public abstract class Piece implements Comparable<Piece> {
         }
         if (animate) {
             GamePanel.clip = sound(soundName);
+            GamePanel.toScroll = 2;
         }
         this.lastMoveState.push(true);
         this.isMoved = true;

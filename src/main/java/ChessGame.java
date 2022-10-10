@@ -558,6 +558,8 @@ public class ChessGame {
         whitePoints -= pawnShield(wk, board);
         blackPoints -= pawnShield(bk, board);
 
+        if (turn) whitePoints += 30; else blackPoints += 30;
+
 
 
         int[] disCalc = endGameDistanceCalc(wk, bk);

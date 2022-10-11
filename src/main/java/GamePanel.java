@@ -551,9 +551,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         Image whiteKing = null;
         Image blackKing = null;
         try {
-            whiteKing = ImageIO.read(new File("C:\\Users\\tal\\IdeaProjects\\chess\\imgs new\\white_king.png"));
+            whiteKing = ImageIO.read(new File(System.getProperty("user.dir") + "\\images\\white_king.png"));
             whiteKing = whiteKing.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-            blackKing = ImageIO.read(new File("C:\\Users\\tal\\IdeaProjects\\chess\\imgs new\\black_king.png"));
+            blackKing = ImageIO.read(new File(System.getProperty("user.dir") + "\\images\\black_king.png"));
             blackKing = blackKing.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         } catch (IOException e) {
             e.printStackTrace();
@@ -673,15 +673,16 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
         for (int i = 0; i < arr.length; i++) {
             if ((i + 1) % 2 == 1) {
                 String space = "&nbsp;";
-                String word = (i / 2 + 1) + ": " + arr[i];
+                String num = (i / 2 + 1)+"";
+                String s = new String(new char[3-num.length()]).replace("\0", "*");
+                String word = num + ":" + s + arr[i];
                 space = new String(new char[12-word.length()]).replace("\0", space);
+                word = word.replace("*", "&nbsp;");
                 drawMoveList += "&nbsp;" + word + space;
             }
             else
                 drawMoveList += arr[i] + "<br/>";
         }
-        int x = scrollPane.getWidth() - 60;
-//        movesBoard.setText("<html><p style=\"width:"+x+"px\">" + drawMoveList + "</p></html>");
         movesBoard.setText(drawMoveList+"</html>");
         if (toScroll > 0) {
             vertical.setValue(vertical.getMaximum());

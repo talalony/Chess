@@ -7,9 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -35,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class GamePanel extends JPanel implements ActionListener, MouseListener {
 
     public static String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-//    	public static String startFen = "8/p7/2K2k2/8/3N4/1N6/8/8 w - - 0 8";
+//    	public static String startFen = "8/7k/7P/3P2P1/5K2/4B2r/8/8 w - - 0 8";
 //public static String startFen = "4r1k1/1QP2pp1/p6p/P7/8/2r1p2P/4K1P1/8 w - - 0 8";
     public static String lastMoveFen = startFen;
 
@@ -141,9 +138,15 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     static List<Object[]> playerMoveList = new ArrayList<>();
     static int moveListCounter = 0;
 
-    GamePanel(JFrame frame) {
+    GamePanel(GameFrame frame) {
         random = new Random();
-        this.setPreferredSize(new Dimension(dim.width, dim.height));
+        if (!frame.fullScreen) {
+            dim.width = dim.width/3;
+            dim.height = (int)(dim.height/1.666666666666667);
+            w = dim.width / 2 - screenWidth / 2;
+            h = dim.height / 2 - screenHeight / 2;
+        }
+        this.setPreferredSize(dim);
         this.setBackground(new Color(32, 32, 32));
         this.setFocusable(true);
         this.addKeyListener(new myKeyAdapter(frame));

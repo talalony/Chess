@@ -94,8 +94,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     boolean resignLabel = false;
     static boolean animation = false;
     static boolean dragging;
-    static int anRow;
-    static int anCol;
     static int vel = 0;
     static List<Piece> takenBlackPieces;
     static List<Piece> takenWhitePieces;
@@ -141,8 +139,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     GamePanel(GameFrame frame) {
         random = new Random();
         if (!frame.fullScreen) {
-            dim.width = dim.width/3;
-            dim.height = (int)(dim.height/1.666666666666667);
+            dim.width = 1280;
+            dim.height = 720;
             w = dim.width / 2 - screenWidth / 2;
             h = dim.height / 2 - screenHeight / 2;
         }
@@ -896,6 +894,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener {
     public void animate(Graphics2D g) {
         int dr;
         int dc;
+        int anRow;
+        int anCol;
         int frameCount = 10;
         if (perspective) {
             dr = (7 - movedTo[0]) * unitSize - (7 - movedFrom[0]) * unitSize;
